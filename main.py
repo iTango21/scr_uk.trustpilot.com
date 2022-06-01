@@ -16,7 +16,7 @@ import fake_useragent
 from fake_useragent import UserAgent
 
 ua = UserAgent()
-ua = ua.random
+ua_ = ua.random
 
 
 # headers = {
@@ -38,8 +38,6 @@ ua = ua.random
 # поиск ЗНАЧЕНИЯ последней страницы ПАГИНАЦИИ
 
 # soup = BeautifulSoup(response.text, 'lxml')
-
-
 
 
 async def get_page_data(session, page):
@@ -111,11 +109,11 @@ async def get_page_data(session, page):
 
 
 async def gather_data():
+    global ua
+    ua_ = ua.random
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "User-Agent": f'{ua}'
-        # "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) \
-        # Chrome/96.0.4664.45 Safari/537.36"
+        "User-Agent": f'{ua_}'
     }
 
     url = 'https://uk.trustpilot.com/categories/pet_store'
@@ -132,6 +130,44 @@ async def gather_data():
 
         print(f'PAG.: {page_count}')
 
+        urls_list = []
+
+    for i in range(1, page_count):
+        url_ = f'https://uk.trustpilot.com/categories/pet_store?page={i}'
+
+        ua_ = ua.random
+        headers = {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "User-Agent": f'{ua_}'
+        }
+
+        async with aiohttp.ClientSession() as session:
+            response = await session.get(url=url_, headers=headers)
+
+            soup = BeautifulSoup(await response.text(), 'lxml')
+
+            # try:
+            #     ele_link_ = soup.find('a', {'name': 'business-unit-card'}).get('href')
+            # except Exception as e:
+            #     print(e)
+
+            ele_links_ = soup.find_all('a', {'name': 'business-unit-card'})
+
+            for u in ele_links_:
+                urls_list.append(f'https://uk.trustpilot.com/{u.get("href")}')
+
+            # ЗАЩИТА от БАНА!!!
+            time.sleep(randrange(0, 2))
+            print(f'Обработал {i} / {page_count}')
+
+    # # запись ссылок из СПИСКА в файл
+    # with open('urls_list.txt', 'w', encoding='utf-8') as file:
+    #     for url in urls_list:
+    #         file.write(f'{url}\n')
+
+
+
+
         tasks = []
 
         # for page in range(1, page_count + 1):
@@ -140,7 +176,7 @@ async def gather_data():
             tasks.append(task)
 
         await asyncio.gather(*tasks)
-    print('777')
+        print('777')
 
 
 def main():
