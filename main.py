@@ -63,9 +63,17 @@ async def get_page_data(session, link_):
 
         soup = BeautifulSoup(response_text, 'lxml')
 
-        ele_title_ = soup.find('span', class_='typography_typography__QgicV typography_h1__Xmcta typography_weight-heavy__E1LTj typography_fontstyle-normal__kHyN3 title_displayName__TtDDM').text
-        ele_reviews_ = soup.find('span', class_='typography_typography__QgicV typography_h2__wAVpO typography_weight-medium__UNMDK typography_fontstyle-normal__kHyN3 styles_reviewCount__wGBxK').text
-        ele_link_ = link_
+        try:
+            ele_title_ = soup.find('span', class_='typography_typography__QgicV typography_h1__Xmcta typography_weight-heavy__E1LTj typography_fontstyle-normal__kHyN3 title_displayName__TtDDM').text
+        except:
+            ele_title_ = 'NONE'
+
+        try:
+            ele_reviews_ = soup.find('span', class_='typography_typography__QgicV typography_h2__wAVpO typography_weight-medium__UNMDK typography_fontstyle-normal__kHyN3 styles_reviewCount__wGBxK').text
+        except:
+            ele_reviews_ = 'NONE'
+
+            ele_link_ = link_
 
         print(ele_title_)
         ele_list.append(
